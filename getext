@@ -1,0 +1,284 @@
+1) Aws
+2) mongo
+3) .net
+4) nosql
+5) python n datascience
+6) c++
+
+Mongo Notes:
+
+to create db : "use db_name" if exists it switches
+the db else will create new db with db_name and 
+switches
+
+show dbs -> to show all the dbs
+you need to have atleast a collection in db
+
+to drop db
+db.dropDatabase()
+
+collection:
+create - > db.createCollection(name, options)
+
+name = name of the collection
+options = {capped:bool #to limit the size of the db
+	   autoIndexId: bool #if true auto indexs def: false
+	   size: bytes, if capped true this field needs to be set
+	   max: number# sets the maximum number of documents}
+
+
+
+name is mandotory field in createCollection while options is optional
+inserting documents in collection
+db.collection_name.insert({"test1":"test1value"})
+if the cspecified collection is not present mongo will create the collection
+
+
+to drop a collection:
+db.collection_name.drop()
+
+
+inserting document into db
+db.collection_name.insert(document)
+
+Example:
+db.mycol.insert({
+   _id: ObjectId(7df78ad8902c),
+   title: 'MongoDB Overview', 
+   description: 'MongoDB is no sql database',
+   by: 'tutorials point',
+   url: 'http://www.tutorialspoint.com',
+   tags: ['mongodb', 'database', 'NoSQL'],
+   likes: 100
+})
+
+if we do not specify _id mongo will create a unique id
+
+id is of 12 bytes in following syntax
+_id: ObjectId(4 bytes timestamp
+		3 bytes machine id
+		2 bytes process id
+		3 bytes increamenter)
+
+we can insert multiple documents in single qurey
+db.collection_name.insert([{},
+			   {}])
+
+we can also use db.collection.save(document) to insert
+if the _id is not specified it will work as insert
+if we specify _id it will repace the content of the document that has the specified _id
+
+
+find(): to query data from MongoDB collection
+db.collection_name.find()
+find() menthod will display all the documents in non strctued way
+
+pretty() : can be used to display the documents in structed way
+example:
+db.collection_name.find().pretty()
+
+
+apart form find there is fineOne() to return only one document.
+
+
+where clause equivvalents in mongo
+
+Equality {<key>:<value>} eg: db.mycol.find({"by":tutorialpoint})
+Lessthan {<key>:{$lt:<value>}} EG: db.mycol.find({"likes":{$lt:50}}).pretty()
+lessthan equal $lte
+greter than $gt
+greater than equal $gte
+not equals: $ne
+
+AND syntax for find
+
+> db.collection_name.find(
+	 {
+	   $and: [{key1:value1}, {key2:value2}]
+	 }		
+	).pretty()
+
+
+
+same syntax for OR
+> db.collection_name.find(
+	{
+	  $or: [{key1:value1},{key2:value2}]
+	}
+       ).pretty()
+
+
+
+remove() to remove the documents from the collection
+drop() to drop the entire collection
+
+remove syntax: 
+> db.collection_name.remove(DELETION_CRITERIA)
+to remove just one record: db.mycol.remove(D_C,1/true)
+
+
+ex: remove all documents with title = 'MongoDB Overview'
+> db.mycol.remove({"title":"MongoDB Overview"})
+
+
+find() method with projection
+projection means show only necessary data rather than whole document
+
+mongo find accepts second optional parameter to achieve this
+
+syntax: 
+> db.collection_name.find({}, {KEY:1}) //to show that KEY
+
+
+Example:
+> db.mycol.find({}, {_id:0,"title":1}).pretty()
+  ^above query hides the _id fields and shows title field in document
+
+
+
+Limit() method is to limit the nimber of recors to show
+syntax:
+> db.collection_name.find().limit(NUMBER)
+
+
+skip() can be used to skim number of records specified
+syntax: 
+> db.collection-name.find().limit(NUMBER).skip(NUMBER2)
+
+
+
+sort() to sort the documets based on some key in document
+syntax:
+> db.collection-name.find().sort({KEY:1}) 1
+	==> 1 for ascending order
+	==> -1 for descending order
+
+example:
+> db.mycol.find({}, {"title":1,_id:0}).sort({"title":-1})
+
+default order to show is ascending
+
+
+
+Indexing:
+without indxes mongo have to search all the documents
+-> not efficient
+-> indexes are specieal data structures that store small
+	portion of the data set in easy-to-traverse form
+
+to create index we need ensureIndex() method
+
+syntax:
+db.collection_name.ensureIndex({KEY:1})
+==> KEY is the field on which indexing should be done
+==> 1 for ascending order -1 for descending order
+
+aggregate is equivalent to count(*) group by in RDBMS
+
+syntax:
+> db.collection_name.aggregate(AGGREGATE_OPERATION)
+
+example:
+> db.mycol.aggregate([{$group: {_id:"$by_user", num_tutorial: {$sum:1}}}])
+
+aggregate functions: sum, avg, min, max, first, last
+			push: inserts the value to array in the resulting document
+			addToSet: same as push except does not allow duplicates
+
+
+
+
+Pipeline options: pipeline is similar to pipes in unix
+$project: used to select some specific fielda from ta collection
+$match: this is a filteing op[eration and this this can reduce the ammount of documents that ate given as tinoput to the next stage
+$group - this does actula aggregation
+$sort: sorts the documents
+$skip:
+$limit
+$unwind: 
+
+
+
+Replication:
+is the process of synchronyzing data across multiple servers. 
+-> redundant
+-> high availability
+-> protects from loss of data due to single server failure
+
+
+
+
+MongoDB achieves replication by use of replica set. 
+Replica Set: is a group of mongodb instances that host same data set
+
+-> only one node is primary all other nodes or instances just update based on reuests made to pprimary node
+-> incase of failure of primary node election will be held to select new primary node
+-> once the failed node recovers it will join the replica set as secondaory set
+
+
+setup relicaset using replSet
+=> stop mongoDB server before creating replicaset
+syntax:
+> mongodb --port "PORT" --dbpath "PATH TO DB" --replSET "REPLICASET INSTANCE NAME"
+
+Example: 
+> mongodb --port 27017 --dbpath "D:\set up\mongdb\data" --replSet rs0
+-> this will start mongodb instance with name rs0 on port 27017
+-> now connecto this isntance from command prompt
+-> in mongo client issue command rs.initiate() to initiate a new replica set
+-> rs.conf() to check the configuration
+-> rs.status() to check the status of replica set
+
+add members to replica set using 
+rs.add()
+
+Syntax: rs.add(HOSTNAME: PORT)
+
+
+db.isMaster() tells of we are connected to primary node
+
+
+
+SHARDING: is the process of stroring data records across multiple machines
+-> to support data growth
+
+WHY? 
+-> in replication all writes goes to master node
+-> latency sesitive queries still go to master
+-> sigle replica set has limitation of 12 nodes
+-> memory cant be large enough when active dataset is big
+-> local disj is not big enough
+-> vertical scaling is too expensive
+
+
+to create mogo backup use "mongodump"
+to restore: mongorestore
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
