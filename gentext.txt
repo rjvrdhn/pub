@@ -25,3 +25,6 @@ GraphViz
 Quandl Python API
 
 INC13016384
+
+Useful study links:
+http://www.bogotobogo.com/cplusplus/cplusplus_keywords.php 
