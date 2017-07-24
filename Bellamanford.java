@@ -76,5 +76,31 @@ public class Graph
 
 public class Bellmanford
 {
-  
+  private Graph myGraph;
+  private int[] distances;
+  private Initialize(int nOfV)
+  {
+    for(int i = 0; i<nOfV; i++)
+    {
+      distances[i] = 0;
+    }
+  }
+  public Bellmanford()
+  {
+    // Read input from commandline and construct Graph
+  }
+  public void Run()
+  {
+    // Algorithm goes here
+  }
+  public void Display()
+  {
+    // Display results from here
+  }
+  public boolean DetectNegativeLoops()
+  {
+    boolean retValue = false;
+    
+    return retValue;
+  }
 }
